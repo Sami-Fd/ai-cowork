@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Cowork — Your Screen-Aware AI Assistant</title>
+    <meta name="description" content="Open-source AI assistant that watches your screen and answers questions about what you're working on. 100% local. Your data never leaves your machine.">
+    <meta property="og:title" content="AI Cowork — Your Screen-Aware AI Assistant">
+    <meta property="og:description" content="Open-source AI that reads your screen and answers questions. Fully local, fully private.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sami-fd.github.io/ai-cowork/">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0b10;
+            --bg2: #12131a;
+            --bg3: #1a1b26;
+            --accent: #7c8aff;
+            --accent2: #a78bfa;
+            --green: #34d399;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --border: #1e293b;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Nav */
+        nav {
+            position: fixed; top: 0; width: 100%; z-index: 50;
+            background: rgba(10, 11, 16, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+        }
+        .nav-inner {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 64px;
+        }
+        .nav-logo {
+            font-size: 20px; font-weight: 700; color: var(--accent);
+            text-decoration: none; display: flex; align-items: center; gap: 8px;
+        }
+        .nav-logo svg { width: 28px; height: 28px; }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-links a {
+            color: var(--muted); text-decoration: none; font-size: 14px;
+            font-weight: 500; transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--text); }
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 24px; border-radius: 8px; font-weight: 600;
+            font-size: 14px; text-decoration: none; transition: all 0.2s;
+            border: none; cursor: pointer;
+        }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: #6b7ae0; transform: translateY(-1px); }
+        .btn-outline {
+            background: transparent; color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-large { padding: 14px 32px; font-size: 16px; border-radius: 10px; }
+
+        /* Hero */
+        .hero {
+            padding: 140px 24px 80px; text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 800px; height: 600px;
+            background: radial-gradient(ellipse, rgba(124,138,255,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 16px; border-radius: 20px;
+            background: rgba(124,138,255,0.1); border: 1px solid rgba(124,138,255,0.2);
+            font-size: 13px; color: var(--accent); font-weight: 500; margin-bottom: 24px;
+        }
+        .badge .dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--green); animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .hero h1 {
+            font-size: clamp(36px, 6vw, 64px); font-weight: 800;
+            line-height: 1.1; margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--text) 0%, var(--accent2) 50%, var(--accent) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 18px; color: var(--muted); max-width: 600px;
+            margin: 0 auto 32px; line-height: 1.7;
+        }
+        .hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .hero-visual {
+            margin-top: 60px; position: relative;
+            max-width: 900px; margin-left: auto; margin-right: auto;
+        }
+        .hero-visual img, .hero-visual .mockup {
+            width: 100%; border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+        }
+        .mockup {
+            background: var(--bg2); aspect-ratio: 16/9;
+            display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
+        }
+        .mockup-bar {
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 36px; background: var(--bg3);
+            display: flex; align-items: center; padding: 0 14px; gap: 6px;
+        }
+        .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .mockup-dot:nth-child(1) { background: #ff5f57; }
+        .mockup-dot:nth-child(2) { background: #ffbd2e; }
+        .mockup-dot:nth-child(3) { background: #28c840; }
+        .mockup-content {
+            padding: 48px 24px 24px; width: 100%; height: 100%;
+            display: flex; gap: 12px;
+        }
+        .mockup-screen {
+            flex: 1; background: #000; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--muted); font-size: 14px;
+        }
+        .mockup-chat {
+            width: 260px; background: var(--bg3); border-radius: 8px;
+            padding: 12px; display: flex; flex-direction: column; gap: 8px;
+        }
+        .mc-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+        .mc-msg {
+            padding: 6px 10px; border-radius: 8px; font-size: 12px; line-height: 1.4;
+        }
+        .mc-bot { background: var(--bg2); }
+        .mc-user { background: rgba(124,138,255,0.2); align-self: flex-end; }
+
+        /* Stats */
+        .stats {
+            display: flex; justify-content: center; gap: 48px;
+            padding: 40px 24px 60px; flex-wrap: wrap;
+        }
+        .stat { text-align: center; }
+        .stat-num { font-size: 32px; font-weight: 800; color: var(--accent); }
+        .stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+        /* Sections */
+        section { padding: 80px 24px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .section-label {
+            font-size: 13px; text-transform: uppercase; letter-spacing: 2px;
+            color: var(--accent); font-weight: 600; margin-bottom: 8px;
+        }
+        .section-title {
+            font-size: clamp(28px, 4vw, 40px); font-weight: 700; margin-bottom: 16px;
+        }
+        .section-desc {
+            font-size: 16px; color: var(--muted); max-width: 600px; margin-bottom: 48px;
+        }
+
+        /* Features grid */
+        .features-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .feature-card {
+            background: var(--bg2); border: 1px solid var(--border);
+            border-radius: 12px; padding: 28px; transition: border-color 0.3s;
+        }
+        .feature-card:hover { border-color: var(--accent); }
+        .feature-icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            background: rgba(124,138,255,0.1); display: flex;
+            align-items: center; justify-content: center;
+            font-size: 22px; margin-bottom: 16px;
+        }
+        .feature-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+        .feature-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+        /* Privacy section */
+        .privacy-section { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .privacy-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+        }
+        .privacy-points { display: flex; flex-direction: column; gap: 20px; }
+        .privacy-point { display: flex; gap: 14px; }
+        .privacy-point .icon {
+            width: 36px; height: 36px; border-radius: 8px;
+            background: rgba(52,211,153,0.1); display: flex;
+            align-items: center; justify-content: center;
+            font-size: 18px; flex-shrink: 0;
+        }
+        .privacy-point h4 { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+        .privacy-point p { font-size: 13px; color: var(--muted); }
+        .privacy-visual {
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 12px; padding: 32px; text-align: center;
+        }
+        .flow-diagram {
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
+        }
+        .flow-node {
+            padding: 10px 24px; border-radius: 8px; font-size: 13px; font-weight: 600;
+            width: 200px; text-align: center;
+        }
+        .flow-node.screen { background: rgba(124,138,255,0.15); color: var(--accent); }
+        .flow-node.ocr { background: rgba(167,139,250,0.15); color: var(--accent2); }
+        .flow-node.llm { background: rgba(52,211,153,0.15); color: var(--green); }
+        .flow-arrow { color: var(--muted); font-size: 18px; }
+
+        /* Providers */
+        .providers-row {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+        }
+        .provider-card {
+            background: var(--bg2); border: 1px solid var(--border);
+            border-radius: 12px; padding: 28px; text-align: center;
+        }
+        .provider-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+        .provider-card .sub { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+        .provider-tag {
+            display: inline-block; padding: 4px 12px; border-radius: 6px;
+            font-size: 12px; font-weight: 600;
+        }
+        .tag-local { background: rgba(52,211,153,0.15); color: var(--green); }
+        .tag-cloud { background: rgba(124,138,255,0.15); color: var(--accent); }
+
+        /* CTA */
+        .cta {
+            text-align: center; padding: 100px 24px;
+            position: relative;
+        }
+        .cta::before {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px; height: 400px;
+            background: radial-gradient(ellipse, rgba(124,138,255,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .cta h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 800; margin-bottom: 16px; }
+        .cta p { font-size: 16px; color: var(--muted); margin-bottom: 32px; }
+        .cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+        /* Install block */
+        .install-block {
+            background: var(--bg2); border: 1px solid var(--border);
+            border-radius: 12px; padding: 24px 28px; max-width: 600px;
+            margin: 32px auto 0; text-align: left;
+        }
+        .install-block code {
+            display: block; font-family: 'SF Mono', Monaco, monospace;
+            font-size: 14px; line-height: 2; color: var(--text);
+        }
+        .install-block .comment { color: var(--muted); }
+        .install-block .cmd { color: var(--green); }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 32px 24px; text-align: center;
+            font-size: 13px; color: var(--muted);
+        }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .privacy-grid { grid-template-columns: 1fr; }
+            .providers-row { grid-template-columns: 1fr; }
+            .mockup-chat { display: none; }
+            .stats { gap: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+    <div class="nav-inner">
+        <a href="#" class="nav-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+            AI Cowork
+        </a>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#privacy">Privacy</a>
+            <a href="#providers">Providers</a>
+            <a href="https://github.com/Sami-Fd/ai-cowork" target="_blank">GitHub</a>
+            <a href="https://github.com/Sami-Fd/ai-cowork/releases" class="btn btn-primary" target="_blank">Download</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="badge"><span class="dot"></span> Open Source &amp; Free</div>
+    <h1>Your AI assistant that<br>sees your screen</h1>
+    <p>AI Cowork watches what's on your screen, reads it with OCR, and lets you ask questions about your work. <strong>100% local. Your data never leaves your machine.</strong></p>
+    <div class="hero-buttons">
+        <a href="https://github.com/Sami-Fd/ai-cowork" class="btn btn-primary btn-large" target="_blank">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            View on GitHub
+        </a>
+        <a href="#quickstart" class="btn btn-outline btn-large">Quick Start →</a>
+    </div>
+
+    <div class="hero-visual">
+        <div class="mockup">
+            <div class="mockup-bar">
+                <span class="mockup-dot"></span>
+                <span class="mockup-dot"></span>
+                <span class="mockup-dot"></span>
+            </div>
+            <div class="mockup-content">
+                <div class="mockup-screen">
+                    <span>📺 Live Screen Preview</span>
+                </div>
+                <div class="mockup-chat">
+                    <div class="mc-label">Chat</div>
+                    <div class="mc-msg mc-bot">Hi! I can see your screen. Ask me anything.</div>
+                    <div class="mc-msg mc-user">What am I working on?</div>
+                    <div class="mc-msg mc-bot">You're editing app.py in VS Code — it looks like a Flask server with screen capture logic.</div>
+                    <div class="mc-msg mc-user">Summarize this page</div>
+                    <div class="mc-msg mc-bot">You're viewing the CrewAI GitHub repo. It's a framework for building autonomous AI agents with Python.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats -->
+<div class="stats">
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Local Processing</div></div>
+    <div class="stat"><div class="stat-num">0</div><div class="stat-label">Data Sent to Cloud</div></div>
+    <div class="stat"><div class="stat-num">3</div><div class="stat-label">LLM Providers</div></div>
+    <div class="stat"><div class="stat-num">&lt;5s</div><div class="stat-label">Screen Read Time</div></div>
+</div>
+
+<!-- Features -->
+<section id="features">
+    <div class="container">
+        <div class="section-label">Features</div>
+        <div class="section-title">Everything you need to work smarter</div>
+        <div class="section-desc">AI Cowork runs quietly in the background, reading your screen and building context so you can ask questions anytime.</div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📸</div>
+                <h3>Live Screen Capture</h3>
+                <p>Automatically captures your screen every few seconds using the blazing-fast <code>mss</code> library. Multi-monitor supported.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3>OCR Text Extraction</h3>
+                <p>Reads all text on screen using Tesseract OCR with smart preprocessing — contrast enhancement, dual-mode scanning, garbled line filtering.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3>Chat About Your Screen</h3>
+                <p>"What am I looking at?" "Summarize this page." "What was I doing 5 minutes ago?" — the AI knows because it was watching.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Privacy Filters</h3>
+                <p>Exclude sensitive windows by title keyword — banking, passwords, private browsing. Capture auto-pauses when those windows are active.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Multiple LLM Backends</h3>
+                <p>Use Ollama locally (zero data leaves your machine), or connect to OpenAI or Anthropic Claude for even smarter answers.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⏸️</div>
+                <h3>Pause &amp; Resume</h3>
+                <p>One-click pause in the dashboard. When paused, nothing is captured or stored. Full control, always.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧠</div>
+                <h3>Session Memory</h3>
+                <p>Keeps up to 50 screen observations in memory during your session. Nothing is written to disk — ever. Close the app, history is gone.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚙️</div>
+                <h3>Settings UI</h3>
+                <p>Switch LLM providers, set API keys, adjust capture intervals, manage privacy filters — all from the web dashboard. No restart needed.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3>Web Dashboard</h3>
+                <p>Clean, modern interface with live screen preview and chat panel. Runs on localhost:8080. Open in any browser.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Privacy -->
+<section class="privacy-section" id="privacy">
+    <div class="container">
+        <div class="privacy-grid">
+            <div>
+                <div class="section-label">Privacy First</div>
+                <div class="section-title">Your data stays on your machine</div>
+                <div class="section-desc" style="margin-bottom:28px">Built from the ground up with privacy as a non-negotiable. No accounts, no telemetry, no cloud storage.</div>
+
+                <div class="privacy-points">
+                    <div class="privacy-point">
+                        <div class="icon">🏠</div>
+                        <div>
+                            <h4>Fully Local Processing</h4>
+                            <p>Screen capture, OCR, and LLM inference all happen on your machine. With Ollama, zero bytes leave your network.</p>
+                        </div>
+                    </div>
+                    <div class="privacy-point">
+                        <div class="icon">💾</div>
+                        <div>
+                            <h4>No Persistence</h4>
+                            <p>Everything is stored in RAM only. Close the app and all observations are gone. No database, no files, no traces.</p>
+                        </div>
+                    </div>
+                    <div class="privacy-point">
+                        <div class="icon">🚫</div>
+                        <div>
+                            <h4>No Telemetry</h4>
+                            <p>No analytics, no crash reports, no usage tracking. The app makes zero outbound connections (except to your chosen LLM).</p>
+                        </div>
+                    </div>
+                    <div class="privacy-point">
+                        <div class="icon">🔐</div>
+                        <div>
+                            <h4>Smart Exclusions</h4>
+                            <p>Automatically skip capturing when sensitive apps are in focus. Set keywords like "bank", "password", "1password".</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="privacy-visual">
+                <div class="flow-diagram">
+                    <div class="flow-node screen">📺 Your Screen</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-node ocr">🔍 Tesseract OCR (local)</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-node llm">🧠 LLM (Ollama — local)</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-node screen">💬 Your Answer</div>
+                </div>
+                <p style="margin-top: 20px; font-size: 14px; color: var(--green); font-weight: 600;">
+                    ✓ Everything happens on localhost
+                </p>
+                <p style="font-size: 13px; color: var(--muted); margin-top: 4px;">
+                    No internet required when using Ollama
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Providers -->
+<section id="providers">
+    <div class="container">
+        <div class="section-label">LLM Providers</div>
+        <div class="section-title">Choose your AI backend</div>
+        <div class="section-desc">Switch between providers anytime from the Settings panel — no restart needed.</div>
+
+        <div class="providers-row">
+            <div class="provider-card">
+                <h3>Ollama</h3>
+                <div class="sub">qwen2.5:7b, llama3, mistral, etc.</div>
+                <span class="provider-tag tag-local">100% Local</span>
+                <p style="margin-top:14px; font-size:13px; color:var(--muted)">Free. Runs on your GPU via Docker. Your data never leaves your machine. Requires NVIDIA GPU.</p>
+            </div>
+            <div class="provider-card">
+                <h3>OpenAI</h3>
+                <div class="sub">GPT-4o, GPT-4o-mini</div>
+                <span class="provider-tag tag-cloud">Cloud API</span>
+                <p style="margin-top:14px; font-size:13px; color:var(--muted)">Bring your own API key. Best quality answers. No GPU required. Pay per usage.</p>
+            </div>
+            <div class="provider-card">
+                <h3>Anthropic</h3>
+                <div class="sub">Claude Sonnet, Claude Haiku</div>
+                <span class="provider-tag tag-cloud">Cloud API</span>
+                <p style="margin-top:14px; font-size:13px; color:var(--muted)">Bring your own API key. Great for long context. No GPU required. Pay per usage.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA / Quickstart -->
+<section class="cta" id="quickstart">
+    <h2>Get started in 60 seconds</h2>
+    <p>Clone, configure, run. It's that simple.</p>
+
+    <div class="install-block">
+        <code>
+            <span class="comment"># Clone the repo</span><br>
+            <span class="cmd">git clone https://github.com/Sami-Fd/ai-cowork.git</span><br>
+            <span class="cmd">cd ai-cowork</span><br>
+            <br>
+            <span class="comment"># Configure</span><br>
+            <span class="cmd">cp .env.example .env</span><br>
+            <br>
+            <span class="comment"># Install dependencies</span><br>
+            <span class="cmd">pip install -r requirements.txt</span><br>
+            <br>
+            <span class="comment"># Start Ollama (optional — for local LLM)</span><br>
+            <span class="cmd">docker compose up -d</span><br>
+            <br>
+            <span class="comment"># Run!</span><br>
+            <span class="cmd">python app.py</span>
+        </code>
+    </div>
+
+    <div class="cta-buttons" style="margin-top: 40px;">
+        <a href="https://github.com/Sami-Fd/ai-cowork" class="btn btn-primary btn-large" target="_blank">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            Star on GitHub
+        </a>
+        <a href="https://github.com/Sami-Fd/ai-cowork/releases" class="btn btn-outline btn-large" target="_blank">Download Latest Release</a>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <p>
+        Made by <a href="https://github.com/Sami-Fd" target="_blank">Sami-Fd</a> ·
+        <a href="https://github.com/Sami-Fd/ai-cowork" target="_blank">GitHub</a> ·
+        MIT License
+    </p>
+</footer>
+
+</body>
+</html>
