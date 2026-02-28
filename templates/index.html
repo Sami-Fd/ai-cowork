@@ -498,6 +498,10 @@
 <div class="settings-overlay" id="settings-overlay">
     <div class="settings-box">
         <h2>&#x2699; Settings</h2>
+
+        <label>Screen to Capture</label>
+        <div id="s-monitor-grid" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"></div>
+
         <label>LLM Provider</label>
         <select id="s-provider">
             <option value="ollama">Ollama (local)</option>
@@ -864,6 +868,45 @@ providerSelect.addEventListener('change', function() {
     document.getElementById('anthropic-opts').style.display = providerSelect.value === 'anthropic' ? '' : 'none';
 });
 
+var settingsMonitor = 0;
+
+async function loadSettingsMonitors(currentIdx) {
+    var grid = document.getElementById('s-monitor-grid');
+    grid.innerHTML = '';
+    settingsMonitor = currentIdx;
+    try {
+        var r = await fetch('/api/monitors');
+        var m = await r.json();
+        var mons = m.monitors || [];
+        for (var i = 0; i < mons.length; i++) {
+            (function(mon) {
+                var card = document.createElement('div');
+                card.style.cssText = 'border:2px solid ' + (mon.index === currentIdx ? '#7c8aff' : '#2a2d3a') + ';border-radius:8px;padding:6px;cursor:pointer;text-align:center;background:#1e2130;min-width:100px;transition:border-color 0.2s;';
+                card.onmouseenter = function(){ if(mon.index !== settingsMonitor) card.style.borderColor='#7c8aff44'; };
+                card.onmouseleave = function(){ card.style.borderColor = mon.index === settingsMonitor ? '#7c8aff' : '#2a2d3a'; };
+                card.onclick = function() {
+                    settingsMonitor = mon.index;
+                    grid.querySelectorAll('div').forEach(function(c){ c.style.borderColor = '#2a2d3a'; });
+                    card.style.borderColor = '#7c8aff';
+                };
+                var img = document.createElement('img');
+                img.src = '/api/monitors/preview/' + mon.index + '?t=' + Date.now();
+                img.style.cssText = 'width:100%;border-radius:4px;margin-bottom:4px;background:#000;min-height:50px;';
+                var lbl = document.createElement('div');
+                lbl.style.cssText = 'font-size:11px;font-weight:600;';
+                lbl.textContent = mon.label;
+                var sz = document.createElement('div');
+                sz.style.cssText = 'font-size:10px;color:#64748b;';
+                sz.textContent = mon.width + ' \u00D7 ' + mon.height;
+                card.appendChild(img);
+                card.appendChild(lbl);
+                card.appendChild(sz);
+                grid.appendChild(card);
+            })(mons[i]);
+        }
+    } catch(e) { grid.textContent = 'Unable to load monitors'; }
+}
+
 async function openSettings() {
     var r = await fetch('/api/settings');
     var s = await r.json();
@@ -877,6 +920,7 @@ async function openSettings() {
     document.getElementById('s-anthropic-hint').textContent = s.anthropic_key_set ? 'Key is set' : '';
     document.getElementById('s-interval').value = s.capture_interval;
     document.getElementById('s-privacy').value = (s.privacy_exclude || []).join(', ');
+    loadSettingsMonitors(s.selected_monitor);
     document.getElementById('settings-overlay').classList.add('show');
 }
 
@@ -893,6 +937,7 @@ async function saveSettings() {
         anthropic_model: document.getElementById('s-anthropic-model').value,
         capture_interval: parseInt(document.getElementById('s-interval').value) || 5,
         privacy_exclude: document.getElementById('s-privacy').value.split(',').map(function(s){ return s.trim(); }).filter(Boolean),
+        selected_monitor: settingsMonitor,
     };
     var openaiKey = document.getElementById('s-openai-key').value;
     if (openaiKey) body.openai_key = openaiKey;

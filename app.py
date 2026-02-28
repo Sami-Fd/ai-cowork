@@ -537,7 +537,7 @@ def api_settings():
     """Get or update runtime settings."""
     global LLM_PROVIDER, OPENAI_API_KEY, OPENAI_MODEL
     global ANTHROPIC_API_KEY, ANTHROPIC_MODEL, OLLAMA_URL, MODEL
-    global CAPTURE_INTERVAL, PRIVACY_EXCLUDE
+    global CAPTURE_INTERVAL, PRIVACY_EXCLUDE, SELECTED_MONITOR
 
     if request.method == "GET":
         return jsonify({
@@ -550,6 +550,7 @@ def api_settings():
             "anthropic_key_set": bool(ANTHROPIC_API_KEY),
             "capture_interval": CAPTURE_INTERVAL,
             "privacy_exclude": PRIVACY_EXCLUDE,
+            "selected_monitor": SELECTED_MONITOR,
         })
 
     body = request.get_json(force=True)
@@ -575,7 +576,10 @@ def api_settings():
             for s in body["privacy_exclude"]
             if s.strip()
         ]
-    log.info(f"Settings updated: provider={LLM_PROVIDER}")
+    if "selected_monitor" in body:
+        SELECTED_MONITOR = int(body["selected_monitor"])
+        log.info(f"Monitor changed to {SELECTED_MONITOR}")
+    log.info(f"Settings updated: provider={LLM_PROVIDER}, monitor={SELECTED_MONITOR}")
     return jsonify({"ok": True})
 
 
