@@ -3,13 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Cowork — Your Screen-Aware AI Assistant</title>
-    <meta name="description" content="Open-source AI assistant that watches your screen and answers questions about what you're working on. 100% local. Your data never leaves your machine.">
-    <meta property="og:title" content="AI Cowork — Your Screen-Aware AI Assistant">
-    <meta property="og:description" content="Open-source AI that reads your screen and answers questions. Fully local, fully private.">
+    <title>AI Cowork — Free Open-Source Screen-Aware AI Assistant | Local & Private</title>
+    <meta name="description" content="AI Cowork is a free, open-source AI assistant that reads your screen with OCR and lets you chat about what you're working on. 100% local — your data never leaves your machine. Supports Ollama, OpenAI, and Claude.">
+    <meta name="keywords" content="AI assistant, screen reader, OCR, open source, local AI, privacy, Ollama, OpenAI, Claude, desktop AI, screen capture, AI coworker, productivity tool, free AI tool, Windows AI assistant">
+    <meta name="author" content="Sami-Fd">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+    <link rel="canonical" href="https://sami-fd.github.io/ai-cowork/">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="AI Cowork — Free Open-Source Screen-Aware AI Assistant">
+    <meta property="og:description" content="Open-source AI that reads your screen and answers questions about your work. Fully local, fully private. Supports Ollama, OpenAI & Claude.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://sami-fd.github.io/ai-cowork/">
+    <meta property="og:site_name" content="AI Cowork">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI Cowork — Screen-Aware AI Assistant">
+    <meta name="twitter:description" content="Free & open-source AI that watches your screen and answers questions. 100% local, your data stays on your machine.">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "AI Cowork",
+        "applicationCategory": "ProductivityApplication",
+        "operatingSystem": "Windows",
+        "description": "Open-source AI assistant that reads your screen with OCR and lets you chat about what you're working on. Supports local LLMs via Ollama, OpenAI, and Anthropic Claude.",
+        "url": "https://sami-fd.github.io/ai-cowork/",
+        "downloadUrl": "https://github.com/Sami-Fd/ai-cowork/releases/download/v1.0.0/ai-cowork-windows.zip",
+        "softwareVersion": "1.0.0",
+        "license": "https://opensource.org/licenses/MIT",
+        "isAccessibleForFree": true,
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "author": {
+            "@type": "Person",
+            "name": "Sami-Fd",
+            "url": "https://github.com/Sami-Fd"
+        },
+        "codeRepository": "https://github.com/Sami-Fd/ai-cowork",
+        "featureList": [
+            "Live screen capture with OCR text extraction",
+            "Chat with AI about what's on your screen",
+            "100% local processing with Ollama",
+            "Multi-LLM support: Ollama, OpenAI, Anthropic Claude",
+            "Privacy filters to exclude sensitive windows",
+            "Monitor selection and switching",
+            "Web dashboard with real-time screen preview",
+            "One-click pause and resume"
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Is AI Cowork free?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, AI Cowork is completely free and open-source under the MIT license."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Does AI Cowork send my screen data to the cloud?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. When using Ollama (local LLM), all processing happens on your machine. Zero data leaves your network. Cloud providers (OpenAI, Claude) are optional."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What LLMs does AI Cowork support?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "AI Cowork supports Ollama for 100% local inference, plus OpenAI (GPT-4o) and Anthropic Claude as optional cloud backends. You can switch between them at any time."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What are the system requirements?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Windows with Tesseract OCR installed. For local LLM: Docker and an NVIDIA GPU. For cloud LLMs: just an API key, no GPU needed."
+                }
+            }
+        ]
+    }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -547,13 +637,50 @@
     </div>
 </section>
 
+<!-- FAQ Section (SEO) -->
+<section id="faq" style="padding:80px 24px;">
+    <div class="container">
+        <div class="section-label">FAQ</div>
+        <div class="section-title">Frequently Asked Questions</div>
+        <div style="max-width:700px;margin-top:32px;display:flex;flex-direction:column;gap:16px;">
+            <details style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:15px;color:var(--text);">Is AI Cowork free?</summary>
+                <p style="margin-top:10px;font-size:14px;color:var(--muted);line-height:1.6;">Yes, AI Cowork is completely free and open-source under the MIT license. No paid plans, no subscriptions, no hidden costs.</p>
+            </details>
+            <details style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:15px;color:var(--text);">Does AI Cowork send my screen data to the cloud?</summary>
+                <p style="margin-top:10px;font-size:14px;color:var(--muted);line-height:1.6;">No. When using Ollama (local LLM), all processing happens entirely on your machine. Zero data leaves your network. Cloud providers (OpenAI, Claude) are optional — the text is only sent if you choose to use them.</p>
+            </details>
+            <details style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:15px;color:var(--text);">What LLMs does AI Cowork support?</summary>
+                <p style="margin-top:10px;font-size:14px;color:var(--muted);line-height:1.6;">AI Cowork supports Ollama for 100% local inference (qwen2.5, llama3, mistral, etc.), plus OpenAI GPT-4o and Anthropic Claude as optional cloud backends. You can switch between them at any time from the dashboard.</p>
+            </details>
+            <details style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:15px;color:var(--text);">What are the system requirements?</summary>
+                <p style="margin-top:10px;font-size:14px;color:var(--muted);line-height:1.6;">Windows with Tesseract OCR installed. For local LLM: Docker and an NVIDIA GPU (4GB+ VRAM). For cloud LLMs: just an API key — no GPU needed.</p>
+            </details>
+            <details style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:15px;color:var(--text);">Is my screen data stored anywhere?</summary>
+                <p style="margin-top:10px;font-size:14px;color:var(--muted);line-height:1.6;">No. Screen observations are kept in RAM only during your session. Nothing is written to disk. Close the app and all data is gone — no database, no files, no traces.</p>
+            </details>
+            <details style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:15px;color:var(--text);">Can I exclude sensitive windows like banking apps?</summary>
+                <p style="margin-top:10px;font-size:14px;color:var(--muted);line-height:1.6;">Yes. Add keywords like "bank", "1password", or "private" to the privacy filter. AI Cowork will automatically skip capturing when those windows are in focus.</p>
+            </details>
+        </div>
+    </div>
+</section>
+
 <!-- Footer -->
 <footer>
-    <p>
-        Made by <a href="https://github.com/Sami-Fd" target="_blank">Sami-Fd</a> ·
-        <a href="https://github.com/Sami-Fd/ai-cowork" target="_blank">GitHub</a> ·
-        MIT License
-    </p>
+    <nav aria-label="Footer">
+        <p>
+            Made by <a href="https://github.com/Sami-Fd" target="_blank" rel="noopener">Sami-Fd</a> ·
+            <a href="https://github.com/Sami-Fd/ai-cowork" target="_blank" rel="noopener">GitHub</a> ·
+            <a href="https://github.com/Sami-Fd/ai-cowork/releases" target="_blank" rel="noopener">Releases</a> ·
+            MIT License
+        </p>
+    </nav>
 </footer>
 
 </body>
