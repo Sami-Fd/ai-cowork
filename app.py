@@ -12,13 +12,27 @@ import io
 import json
 import logging
 import os
+import sys
 import threading
 import time
+import webbrowser
 from collections import deque
 
-# Load .env file
+# Load .env file — handle PyInstaller bundle path
 from dotenv import load_dotenv
-load_dotenv()
+
+def _resource_path(relative: str) -> str:
+    """Get absolute path to a resource, works for dev and for PyInstaller."""
+    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, relative)
+
+# Try loading .env from CWD first, then from bundle
+if os.path.exists(".env"):
+    load_dotenv(".env")
+elif os.path.exists(_resource_path(".env.example")):
+    load_dotenv(_resource_path(".env.example"))
+else:
+    load_dotenv()
 
 import mss
 import pytesseract
@@ -50,14 +64,27 @@ PRIVACY_EXCLUDE = [
     if s.strip()
 ]
 
+# Monitor selection (0 = full virtual screen, 1 = first monitor, etc.)
+SELECTED_MONITOR = int(os.getenv("SELECTED_MONITOR", "0"))
+
 # Tesseract path on Windows (default install location)
+TESSERACT_OK = False
 if os.name == "nt":
-    tesseract_path = os.getenv(
-        "TESSERACT_PATH",
+    _candidates = [
+        os.getenv("TESSERACT_PATH", ""),
         os.path.expandvars(r"%LOCALAPPDATA%\Programs\Tesseract-OCR\tesseract.exe"),
-    )
-    if os.path.exists(tesseract_path):
-        pytesseract.pytesseract.tesseract_cmd = tesseract_path
+        r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+        r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+    ]
+    for tesseract_path in _candidates:
+        if tesseract_path and os.path.exists(tesseract_path):
+            pytesseract.pytesseract.tesseract_cmd = tesseract_path
+            TESSERACT_OK = True
+            break
+else:
+    # On Linux/Mac, assume it's in PATH
+    import shutil
+    TESSERACT_OK = shutil.which("tesseract") is not None
 
 logging.basicConfig(
     level=logging.INFO,
@@ -65,6 +92,9 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 log = logging.getLogger("cowork")
+
+# Setup state — app starts in setup mode until user completes onboarding
+SETUP_COMPLETE = False
 
 
 # ---------------------------------------------------------------------------
@@ -184,7 +214,10 @@ class ScreenReader:
     def capture(self) -> Image.Image | None:
         try:
             with mss.mss() as sct:
-                monitor = sct.monitors[0]          # full virtual screen
+                idx = SELECTED_MONITOR
+                if idx < 0 or idx >= len(sct.monitors):
+                    idx = 0
+                monitor = sct.monitors[idx]
                 shot = sct.grab(monitor)
                 img = Image.frombytes("RGB", shot.size, shot.bgra, "raw", "BGRX")
             # keep a PNG copy for the dashboard
@@ -266,8 +299,11 @@ class ScreenReader:
     def start(self):
         self._running = True
         def loop():
-            time.sleep(2)
-            log.info(f"Screen reader started (every {CAPTURE_INTERVAL}s)")
+            # Wait for setup to complete before starting capture
+            while self._running and not SETUP_COMPLETE:
+                time.sleep(0.5)
+            time.sleep(1)
+            log.info(f"Screen reader started (every {CAPTURE_INTERVAL}s, monitor {SELECTED_MONITOR})")
             while self._running:
                 self.observe()
                 time.sleep(CAPTURE_INTERVAL)
@@ -289,6 +325,111 @@ reader = ScreenReader()
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+# ---------------------------------------------------------------------------
+# Monitor API — list screens & get thumbnails
+# ---------------------------------------------------------------------------
+@app.route("/api/monitors")
+def api_monitors():
+    """List all available monitors with size info."""
+    try:
+        with mss.mss() as sct:
+            monitors = []
+            for i, m in enumerate(sct.monitors):
+                label = "All Screens Combined" if i == 0 else f"Monitor {i}"
+                monitors.append({
+                    "index": i,
+                    "label": label,
+                    "width": m["width"],
+                    "height": m["height"],
+                    "left": m["left"],
+                    "top": m["top"],
+                })
+        return jsonify({"monitors": monitors, "selected": SELECTED_MONITOR})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/monitors/preview/<int:idx>")
+def api_monitor_preview(idx: int):
+    """Capture a thumbnail preview of a specific monitor."""
+    try:
+        with mss.mss() as sct:
+            if idx < 0 or idx >= len(sct.monitors):
+                return jsonify({"error": "Invalid monitor index"}), 400
+            monitor = sct.monitors[idx]
+            shot = sct.grab(monitor)
+            img = Image.frombytes("RGB", shot.size, shot.bgra, "raw", "BGRX")
+
+        # Resize to thumbnail (max 400px wide)
+        w, h = img.size
+        scale = min(400 / w, 300 / h, 1.0)
+        thumb = img.resize((int(w * scale), int(h * scale)), Image.LANCZOS)
+
+        buf = io.BytesIO()
+        thumb.save(buf, format="PNG", optimize=True)
+        buf.seek(0)
+        return send_file(buf, mimetype="image/png")
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ---------------------------------------------------------------------------
+# Setup / Onboarding API
+# ---------------------------------------------------------------------------
+@app.route("/api/setup/status")
+def api_setup_status():
+    """Return current setup state and system checks."""
+    ollama_ok = False
+    try:
+        r = requests.get(f"{OLLAMA_URL}/api/tags", timeout=3)
+        ollama_ok = r.ok
+    except Exception:
+        pass
+
+    return jsonify({
+        "setup_complete": SETUP_COMPLETE,
+        "tesseract_ok": TESSERACT_OK,
+        "ollama_ok": ollama_ok,
+        "selected_monitor": SELECTED_MONITOR,
+        "llm_provider": LLM_PROVIDER,
+    })
+
+
+@app.route("/api/setup/complete", methods=["POST"])
+def api_setup_complete():
+    """Finalize setup with user choices."""
+    global SETUP_COMPLETE, SELECTED_MONITOR, LLM_PROVIDER
+    global OPENAI_API_KEY, OPENAI_MODEL, ANTHROPIC_API_KEY, ANTHROPIC_MODEL
+    global CAPTURE_INTERVAL, PRIVACY_EXCLUDE
+
+    body = request.get_json(force=True)
+
+    if "monitor" in body:
+        SELECTED_MONITOR = int(body["monitor"])
+    if "llm_provider" in body:
+        LLM_PROVIDER = body["llm_provider"]
+    if "openai_key" in body and body["openai_key"]:
+        OPENAI_API_KEY = body["openai_key"]
+    if "openai_model" in body:
+        OPENAI_MODEL = body["openai_model"]
+    if "anthropic_key" in body and body["anthropic_key"]:
+        ANTHROPIC_API_KEY = body["anthropic_key"]
+    if "anthropic_model" in body:
+        ANTHROPIC_MODEL = body["anthropic_model"]
+    if "capture_interval" in body:
+        CAPTURE_INTERVAL = max(1, int(body["capture_interval"]))
+    if "privacy_exclude" in body:
+        PRIVACY_EXCLUDE = [
+            s.strip().lower()
+            for s in body["privacy_exclude"]
+            if s.strip()
+        ]
+
+    SETUP_COMPLETE = True
+    log.info(f"Setup complete: monitor={SELECTED_MONITOR}, provider={LLM_PROVIDER}")
+    return jsonify({"ok": True})
 
 
 @app.route("/api/screen")
@@ -377,6 +518,8 @@ def api_status():
         "interval": CAPTURE_INTERVAL,
         "paused": reader._paused,
         "privacy_filters": PRIVACY_EXCLUDE,
+        "setup_complete": SETUP_COMPLETE,
+        "selected_monitor": SELECTED_MONITOR,
     })
 
 
@@ -440,9 +583,21 @@ def api_settings():
 # Main
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
+    # When running from PyInstaller bundle, set template folder
+    if getattr(sys, "frozen", False):
+        app.template_folder = _resource_path("templates")
+
     reader.start()
-    log.info(f"Dashboard → http://localhost:{PORT}")
+    url = f"http://localhost:{PORT}"
+    log.info(f"Dashboard → {url}")
     log.info(f"LLM provider: {LLM_PROVIDER}")
     if PRIVACY_EXCLUDE:
         log.info(f"Privacy filters: {PRIVACY_EXCLUDE}")
+
+    # Auto-open browser after a short delay
+    def _open_browser():
+        time.sleep(1.5)
+        webbrowser.open(url)
+    threading.Thread(target=_open_browser, daemon=True).start()
+
     app.run(host="0.0.0.0", port=PORT, debug=False)

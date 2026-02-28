@@ -15,49 +15,206 @@
             flex-direction: column;
         }
 
-        /* Header */
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 20px;
+        /* ===== SETUP WIZARD ===== */
+        .setup-overlay {
+            position: fixed; inset: 0; z-index: 200;
+            background: #0f1117;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.4s;
+        }
+        .setup-overlay.hidden { opacity: 0; pointer-events: none; }
+        .setup-card {
             background: #161822;
-            border-bottom: 1px solid #2a2d3a;
-            gap: 12px;
+            border: 1px solid #2a2d3a;
+            border-radius: 16px;
+            width: 640px; max-width: 95vw; max-height: 90vh;
+            overflow-y: auto; padding: 36px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+        }
+        .setup-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 22px; font-weight: 700; color: #7c8aff;
+            margin-bottom: 6px;
+        }
+        .setup-logo svg { width: 28px; height: 28px; }
+        .setup-subtitle { color: #64748b; font-size: 14px; margin-bottom: 32px; }
+
+        /* Steps indicator */
+        .steps-bar {
+            display: flex; gap: 8px; margin-bottom: 28px;
+        }
+        .step-dot {
+            flex: 1; height: 4px; border-radius: 2px;
+            background: #1e2130; transition: background 0.3s;
+        }
+        .step-dot.active { background: #7c8aff; }
+        .step-dot.done { background: #34d399; }
+
+        /* Step panels */
+        .step-panel { display: none; }
+        .step-panel.active { display: block; }
+
+        .step-title {
+            font-size: 18px; font-weight: 700; margin-bottom: 4px;
+        }
+        .step-desc { color: #64748b; font-size: 14px; margin-bottom: 20px; }
+
+        /* Monitor selection */
+        .monitor-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px; margin-bottom: 8px;
+        }
+        .monitor-card {
+            border: 2px solid #2a2d3a; border-radius: 10px;
+            padding: 10px; cursor: pointer; transition: all 0.2s;
+            text-align: center; background: #1e2130;
+        }
+        .monitor-card:hover { border-color: #7c8aff44; }
+        .monitor-card.selected { border-color: #7c8aff; background: #7c8aff11; }
+        .monitor-card img {
+            width: 100%; border-radius: 6px; margin-bottom: 8px;
+            background: #000; min-height: 80px;
+        }
+        .monitor-card .mon-label { font-size: 13px; font-weight: 600; }
+        .monitor-card .mon-size { font-size: 11px; color: #64748b; }
+
+        /* Provider cards */
+        .provider-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 12px; margin-bottom: 16px;
+        }
+        .provider-card {
+            border: 2px solid #2a2d3a; border-radius: 10px;
+            padding: 16px; cursor: pointer; transition: all 0.2s;
+            text-align: center; background: #1e2130;
+        }
+        .provider-card:hover { border-color: #7c8aff44; }
+        .provider-card.selected { border-color: #7c8aff; background: #7c8aff11; }
+        .provider-card .prov-icon { font-size: 28px; margin-bottom: 8px; }
+        .provider-card .prov-name { font-size: 14px; font-weight: 600; }
+        .provider-card .prov-desc { font-size: 11px; color: #64748b; margin-top: 2px; }
+        .provider-card .prov-tag {
+            display: inline-block; padding: 2px 8px; border-radius: 4px;
+            font-size: 10px; font-weight: 600; margin-top: 8px;
+        }
+        .tag-local { background: #34d39922; color: #34d399; }
+        .tag-cloud { background: #7c8aff22; color: #7c8aff; }
+
+        /* Provider config */
+        .provider-config { display: none; margin-top: 16px; }
+        .provider-config.show { display: block; }
+        .provider-config label {
+            display: block; font-size: 11px; color: #64748b;
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+        }
+        .provider-config input {
+            width: 100%; background: #0f1117; border: 1px solid #2a2d3a;
+            border-radius: 6px; padding: 8px 12px; color: #e0e0e0;
+            font-size: 13px; outline: none; margin-bottom: 12px;
+        }
+        .provider-config input:focus { border-color: #7c8aff; }
+        .provider-row { display: flex; gap: 12px; }
+        .provider-row > div { flex: 1; }
+
+        /* Privacy config */
+        .privacy-row {
+            display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px;
+        }
+        .privacy-row input {
+            flex: 1; background: #0f1117; border: 1px solid #2a2d3a;
+            border-radius: 6px; padding: 8px 12px; color: #e0e0e0;
+            font-size: 13px; outline: none;
+        }
+        .privacy-row input:focus { border-color: #7c8aff; }
+
+        .privacy-tags {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px;
+        }
+        .privacy-tag {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: #f4433622; color: #f44336; padding: 4px 10px;
+            border-radius: 6px; font-size: 12px; font-weight: 500;
+        }
+        .privacy-tag .remove {
+            cursor: pointer; opacity: 0.7; font-size: 14px;
+        }
+        .privacy-tag .remove:hover { opacity: 1; }
+
+        .interval-row {
+            display: flex; align-items: center; gap: 10px; margin-top: 16px;
+        }
+        .interval-row label { font-size: 13px; color: #e0e0e0; white-space: nowrap; }
+        .interval-row input {
+            width: 80px; background: #0f1117; border: 1px solid #2a2d3a;
+            border-radius: 6px; padding: 8px 12px; color: #e0e0e0;
+            font-size: 13px; outline: none; text-align: center;
+        }
+        .interval-row span { font-size: 13px; color: #64748b; }
+
+        /* System checks */
+        .check-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .check-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 14px; border-radius: 8px; background: #1e2130;
+        }
+        .check-icon { width: 24px; height: 24px; font-size: 16px; text-align: center; line-height: 24px; }
+        .check-icon.ok { color: #34d399; }
+        .check-icon.warn { color: #fbbf24; }
+        .check-icon.err { color: #f44336; }
+        .check-icon.loading { color: #64748b; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .check-text { flex: 1; }
+        .check-text .name { font-size: 14px; font-weight: 500; }
+        .check-text .detail { font-size: 12px; color: #64748b; }
+
+        /* Setup Buttons */
+        .setup-nav {
+            display: flex; gap: 10px; justify-content: flex-end; margin-top: 28px;
+        }
+        .s-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 10px 24px; border-radius: 8px; border: none;
+            cursor: pointer; font-size: 14px; font-weight: 600;
+            transition: all 0.2s;
+        }
+        .s-btn-primary { background: #7c8aff; color: #fff; }
+        .s-btn-primary:hover { background: #6b7ae0; }
+        .s-btn-secondary { background: #1e2130; color: #aaa; }
+        .s-btn-secondary:hover { background: #2a2d3a; color: #fff; }
+        .s-btn-start {
+            background: #34d399; color: #0f1117; padding: 12px 32px;
+            font-size: 16px;
+        }
+        .s-btn-start:hover { background: #2bc48a; }
+        .s-btn:disabled { opacity: 0.4; cursor: default; }
+
+        /* ===== DASHBOARD ===== */
+        header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 20px; background: #161822;
+            border-bottom: 1px solid #2a2d3a; gap: 12px;
         }
         header h1 { font-size: 18px; color: #7c8aff; white-space: nowrap; }
         .header-right { display: flex; align-items: center; gap: 10px; }
         #status {
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 12px;
-            background: #1e2130;
+            font-size: 12px; padding: 4px 10px;
+            border-radius: 12px; background: #1e2130;
         }
         #status.ok { color: #4caf50; }
         #status.err { color: #f44336; }
         .hdr-btn {
-            background: #1e2130;
-            border: 1px solid #2a2d3a;
-            color: #aaa;
-            border-radius: 6px;
-            padding: 5px 12px;
-            cursor: pointer;
-            font-size: 12px;
+            background: #1e2130; border: 1px solid #2a2d3a; color: #aaa;
+            border-radius: 6px; padding: 5px 12px; cursor: pointer; font-size: 12px;
         }
         .hdr-btn:hover { background: #2a2d3a; color: #fff; }
         .hdr-btn.active { background: #7c8aff33; border-color: #7c8aff; color: #7c8aff; }
         #pause-btn.paused { background: #f4433633; border-color: #f44336; color: #f44336; }
 
-        /* Main layout */
         .main { flex: 1; display: flex; overflow: hidden; }
 
-        /* Screen panel */
         .screen-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 12px;
-            min-width: 0;
+            flex: 1; display: flex; flex-direction: column;
+            padding: 12px; min-width: 0;
         }
         .screen-panel h2 {
             font-size: 13px; color: #888; margin-bottom: 8px;
@@ -68,7 +225,6 @@
             object-fit: contain; width: 100%; min-height: 0;
         }
 
-        /* Chat panel */
         .chat-panel {
             width: 380px; display: flex; flex-direction: column;
             border-left: 1px solid #2a2d3a; background: #161822;
@@ -90,7 +246,6 @@
         .msg.bot { background: #1e2130; align-self: flex-start; border-bottom-left-radius: 2px; }
         .msg.bot.loading { color: #666; font-style: italic; }
 
-        /* Input bar */
         .input-bar {
             display: flex; padding: 12px; gap: 8px;
             border-top: 1px solid #2a2d3a;
@@ -108,7 +263,7 @@
         #send-btn:hover { background: #6b7ae0; }
         #send-btn:disabled { opacity: 0.4; cursor: default; }
 
-        /* Settings panel (overlay) */
+        /* Settings overlay */
         .settings-overlay {
             display: none; position: fixed; inset: 0; z-index: 100;
             background: rgba(0,0,0,0.6); justify-content: center; align-items: center;
@@ -144,245 +299,621 @@
         .btn-cancel:hover { background: #333; }
         .hint { font-size: 11px; color: #555; margin-top: 2px; }
 
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>AI Cowork</h1>
-        <div class="header-right">
-            <span id="status">connecting...</span>
-            <button id="pause-btn" class="hdr-btn" onclick="togglePause()">Pause</button>
-            <button class="hdr-btn" onclick="openSettings()">Settings</button>
-        </div>
-    </header>
 
-    <div class="main">
-        <div class="screen-panel">
-            <h2>Live Screen</h2>
-            <img id="screen-img" alt="Screen capture" />
+<!-- ====== SETUP WIZARD ====== -->
+<div class="setup-overlay" id="setup-overlay">
+    <div class="setup-card">
+        <div class="setup-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+            AI Cowork
         </div>
-        <div class="chat-panel">
-            <h2>Chat</h2>
-            <div id="messages">
-                <div class="msg bot">Hi! I can see your screen. Ask me anything about what you're working on.</div>
+        <div class="setup-subtitle">Screen-aware AI assistant — let's set things up</div>
+
+        <div class="steps-bar">
+            <div class="step-dot active" data-step="0"></div>
+            <div class="step-dot" data-step="1"></div>
+            <div class="step-dot" data-step="2"></div>
+            <div class="step-dot" data-step="3"></div>
+        </div>
+
+        <!-- STEP 0: System Check -->
+        <div class="step-panel active" data-step="0">
+            <div class="step-title">System Check</div>
+            <div class="step-desc">Verifying your system is ready...</div>
+            <div class="check-list" id="check-list">
+                <div class="check-item" id="chk-tess">
+                    <div class="check-icon loading">&#x27F3;</div>
+                    <div class="check-text">
+                        <div class="name">Tesseract OCR</div>
+                        <div class="detail">Required for screen reading</div>
+                    </div>
+                </div>
+                <div class="check-item" id="chk-llm">
+                    <div class="check-icon loading">&#x27F3;</div>
+                    <div class="check-text">
+                        <div class="name">LLM Backend</div>
+                        <div class="detail">Checking Ollama connection...</div>
+                    </div>
+                </div>
+                <div class="check-item" id="chk-screen">
+                    <div class="check-icon loading">&#x27F3;</div>
+                    <div class="check-text">
+                        <div class="name">Screen Capture</div>
+                        <div class="detail">Detecting monitors...</div>
+                    </div>
+                </div>
             </div>
-            <div class="input-bar">
-                <input id="chat-input" type="text" placeholder="Ask about your screen..." autocomplete="off" />
-                <button id="send-btn">Send</button>
+            <div class="setup-nav">
+                <button class="s-btn s-btn-primary" id="btn-step0-next" disabled onclick="goStep(1)">
+                    Continue &rarr;
+                </button>
             </div>
         </div>
-    </div>
 
-    <!-- Settings modal -->
-    <div class="settings-overlay" id="settings-overlay">
-        <div class="settings-box">
-            <h2>Settings</h2>
-            <label>LLM Provider</label>
-            <select id="s-provider">
-                <option value="ollama">Ollama (local)</option>
-                <option value="openai">OpenAI</option>
-                <option value="anthropic">Anthropic Claude</option>
-            </select>
+        <!-- STEP 1: Monitor Selection -->
+        <div class="step-panel" data-step="1">
+            <div class="step-title">Select Screen to Share</div>
+            <div class="step-desc">Choose which monitor AI Cowork should watch. Only the selected screen will be captured.</div>
+            <div class="monitor-grid" id="monitor-grid"></div>
+            <div class="setup-nav">
+                <button class="s-btn s-btn-secondary" onclick="goStep(0)">&larr; Back</button>
+                <button class="s-btn s-btn-primary" onclick="goStep(2)">Continue &rarr;</button>
+            </div>
+        </div>
 
-            <div id="ollama-opts">
-                <div class="row">
+        <!-- STEP 2: LLM Provider -->
+        <div class="step-panel" data-step="2">
+            <div class="step-title">Choose AI Provider</div>
+            <div class="step-desc">Select the LLM that will answer your questions. You can change this later in Settings.</div>
+            <div class="provider-grid">
+                <div class="provider-card selected" data-provider="ollama" onclick="selectProvider('ollama')">
+                    <div class="prov-icon">&#x1F999;</div>
+                    <div class="prov-name">Ollama</div>
+                    <div class="prov-desc">Local &middot; Free &middot; Private</div>
+                    <span class="prov-tag tag-local">100% LOCAL</span>
+                </div>
+                <div class="provider-card" data-provider="openai" onclick="selectProvider('openai')">
+                    <div class="prov-icon">&#x26A1;</div>
+                    <div class="prov-name">OpenAI</div>
+                    <div class="prov-desc">GPT-4o &middot; Smart</div>
+                    <span class="prov-tag tag-cloud">CLOUD API</span>
+                </div>
+                <div class="provider-card" data-provider="anthropic" onclick="selectProvider('anthropic')">
+                    <div class="prov-icon">&#x1F9E0;</div>
+                    <div class="prov-name">Claude</div>
+                    <div class="prov-desc">Anthropic &middot; Long context</div>
+                    <span class="prov-tag tag-cloud">CLOUD API</span>
+                </div>
+            </div>
+
+            <div class="provider-config" id="cfg-ollama">
+                <div class="provider-row">
                     <div>
                         <label>Ollama URL</label>
-                        <input id="s-ollama-url" type="text" placeholder="http://localhost:11434" />
+                        <input id="w-ollama-url" value="http://localhost:11434" />
                     </div>
                     <div>
                         <label>Model</label>
-                        <input id="s-ollama-model" type="text" placeholder="qwen2.5:7b" />
+                        <input id="w-ollama-model" value="qwen2.5:7b" />
                     </div>
                 </div>
             </div>
 
-            <div id="openai-opts" style="display:none">
-                <div class="row">
+            <div class="provider-config" id="cfg-openai">
+                <div class="provider-row">
                     <div>
                         <label>API Key</label>
-                        <input id="s-openai-key" type="password" placeholder="sk-..." />
-                        <div class="hint" id="s-openai-hint"></div>
+                        <input id="w-openai-key" type="password" placeholder="sk-..." />
                     </div>
                     <div>
                         <label>Model</label>
-                        <input id="s-openai-model" type="text" placeholder="gpt-4o-mini" />
+                        <input id="w-openai-model" value="gpt-4o-mini" />
                     </div>
                 </div>
             </div>
 
-            <div id="anthropic-opts" style="display:none">
-                <div class="row">
+            <div class="provider-config" id="cfg-anthropic">
+                <div class="provider-row">
                     <div>
                         <label>API Key</label>
-                        <input id="s-anthropic-key" type="password" placeholder="sk-ant-..." />
-                        <div class="hint" id="s-anthropic-hint"></div>
+                        <input id="w-anthropic-key" type="password" placeholder="sk-ant-..." />
                     </div>
                     <div>
                         <label>Model</label>
-                        <input id="s-anthropic-model" type="text" placeholder="claude-sonnet-4-20250514" />
+                        <input id="w-anthropic-model" value="claude-sonnet-4-20250514" />
                     </div>
                 </div>
             </div>
 
-            <label>Capture Interval (seconds)</label>
-            <input id="s-interval" type="number" min="1" max="60" value="5" />
+            <div class="setup-nav">
+                <button class="s-btn s-btn-secondary" onclick="goStep(1)">&larr; Back</button>
+                <button class="s-btn s-btn-primary" onclick="goStep(3)">Continue &rarr;</button>
+            </div>
+        </div>
 
-            <label>Privacy Filter (exclude windows containing)</label>
-            <input id="s-privacy" type="text" placeholder="e.g. banking, password, 1password" />
-            <div class="hint">Comma-separated keywords. Windows with matching titles won't be captured.</div>
+        <!-- STEP 3: Privacy & Start -->
+        <div class="step-panel" data-step="3">
+            <div class="step-title">Privacy &amp; Preferences</div>
+            <div class="step-desc">Exclude sensitive windows from capture. Add keywords that appear in window titles you want to skip.</div>
 
-            <div class="settings-actions">
-                <button class="btn-cancel" onclick="closeSettings()">Cancel</button>
-                <button class="btn-save" onclick="saveSettings()">Save</button>
+            <div class="privacy-tags" id="privacy-tags"></div>
+            <div class="privacy-row">
+                <input id="privacy-input" type="text" placeholder='e.g. "banking", "1password", "private"'
+                       onkeydown="if(event.key==='Enter'){event.preventDefault();addPrivacyTag();}" />
+                <button class="s-btn s-btn-secondary" onclick="addPrivacyTag()" style="padding:8px 14px;white-space:nowrap;">+ Add</button>
+            </div>
+
+            <div class="interval-row">
+                <label>Capture every</label>
+                <input id="w-interval" type="number" min="1" max="60" value="5" />
+                <span>seconds</span>
+            </div>
+
+            <div class="setup-nav" style="margin-top:32px">
+                <button class="s-btn s-btn-secondary" onclick="goStep(2)">&larr; Back</button>
+                <button class="s-btn s-btn-start" onclick="completeSetup()">
+                    &#x1F680; Start Monitoring
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        const img = document.getElementById('screen-img');
-        const input = document.getElementById('chat-input');
-        const btn = document.getElementById('send-btn');
-        const messages = document.getElementById('messages');
-        const statusEl = document.getElementById('status');
-        const pauseBtn = document.getElementById('pause-btn');
+<!-- ====== DASHBOARD ====== -->
+<header>
+    <h1>&#x1F5A5; AI Cowork</h1>
+    <div class="header-right">
+        <span id="status">connecting...</span>
+        <button id="pause-btn" class="hdr-btn" onclick="togglePause()">&#x23F8; Pause</button>
+        <button class="hdr-btn" onclick="openSettings()">&#x2699; Settings</button>
+    </div>
+</header>
 
-        // Refresh screen every 3s
-        function refreshScreen() {
-            const n = new Image();
-            n.onload = () => { img.src = n.src; };
-            n.src = '/api/screen?t=' + Date.now();
+<div class="main">
+    <div class="screen-panel">
+        <h2>Live Screen</h2>
+        <img id="screen-img" alt="Screen capture" />
+    </div>
+    <div class="chat-panel">
+        <h2>Chat</h2>
+        <div id="messages">
+            <div class="msg bot">Hi! I can see your screen. Ask me anything about what you're working on.</div>
+        </div>
+        <div class="input-bar">
+            <input id="chat-input" type="text" placeholder="Ask about your screen..." autocomplete="off" />
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+</div>
+
+<!-- Settings modal -->
+<div class="settings-overlay" id="settings-overlay">
+    <div class="settings-box">
+        <h2>&#x2699; Settings</h2>
+        <label>LLM Provider</label>
+        <select id="s-provider">
+            <option value="ollama">Ollama (local)</option>
+            <option value="openai">OpenAI</option>
+            <option value="anthropic">Anthropic Claude</option>
+        </select>
+
+        <div id="ollama-opts">
+            <div class="row">
+                <div>
+                    <label>Ollama URL</label>
+                    <input id="s-ollama-url" type="text" placeholder="http://localhost:11434" />
+                </div>
+                <div>
+                    <label>Model</label>
+                    <input id="s-ollama-model" type="text" placeholder="qwen2.5:7b" />
+                </div>
+            </div>
+        </div>
+
+        <div id="openai-opts" style="display:none">
+            <div class="row">
+                <div>
+                    <label>API Key</label>
+                    <input id="s-openai-key" type="password" placeholder="sk-..." />
+                    <div class="hint" id="s-openai-hint"></div>
+                </div>
+                <div>
+                    <label>Model</label>
+                    <input id="s-openai-model" type="text" placeholder="gpt-4o-mini" />
+                </div>
+            </div>
+        </div>
+
+        <div id="anthropic-opts" style="display:none">
+            <div class="row">
+                <div>
+                    <label>API Key</label>
+                    <input id="s-anthropic-key" type="password" placeholder="sk-ant-..." />
+                    <div class="hint" id="s-anthropic-hint"></div>
+                </div>
+                <div>
+                    <label>Model</label>
+                    <input id="s-anthropic-model" type="text" placeholder="claude-sonnet-4-20250514" />
+                </div>
+            </div>
+        </div>
+
+        <label>Capture Interval (seconds)</label>
+        <input id="s-interval" type="number" min="1" max="60" value="5" />
+
+        <label>Privacy Filter (exclude windows containing)</label>
+        <input id="s-privacy" type="text" placeholder="e.g. banking, password, 1password" />
+        <div class="hint">Comma-separated keywords. Windows with matching titles won't be captured.</div>
+
+        <div class="settings-actions">
+            <button class="btn-cancel" onclick="closeSettings()">Cancel</button>
+            <button class="btn-save" onclick="saveSettings()">Save</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ========== SETUP WIZARD ==========
+let currentStep = 0;
+let selectedMonitor = 0;
+let selectedProvider = 'ollama';
+let privacyKeywords = [];
+let monitorsData = [];
+
+async function initSetup() {
+    // Check if setup was already completed (page refresh)
+    try {
+        const r = await fetch('/api/setup/status');
+        const s = await r.json();
+        if (s.setup_complete) {
+            document.getElementById('setup-overlay').classList.add('hidden');
+            setTimeout(function(){ document.getElementById('setup-overlay').remove(); }, 500);
+            startDashboard();
+            return;
         }
-        setInterval(refreshScreen, 3000);
-        refreshScreen();
+    } catch(e) { console.error(e); }
 
-        // Status poll
-        async function checkStatus() {
-            try {
-                const r = await fetch('/api/status');
-                const d = await r.json();
-                const prov = d.provider === 'ollama' ? d.llm : d.provider;
-                statusEl.textContent = `${prov} · ${d.observations} obs · ${d.model}`;
-                statusEl.className = d.llm === 'connected' ? 'ok' : 'err';
-                if (d.paused) {
-                    pauseBtn.textContent = 'Resume';
-                    pauseBtn.classList.add('paused');
-                } else {
-                    pauseBtn.textContent = 'Pause';
-                    pauseBtn.classList.remove('paused');
-                }
-            } catch {
-                statusEl.textContent = 'offline';
-                statusEl.className = 'err';
-            }
-        }
-        setInterval(checkStatus, 8000);
-        checkStatus();
+    // Run system checks
+    runSystemChecks();
+}
 
-        // Pause toggle
-        async function togglePause() {
-            await fetch('/api/pause', { method: 'POST' });
-            checkStatus();
+async function runSystemChecks() {
+    var chkTess = document.getElementById('chk-tess');
+    var chkLlm = document.getElementById('chk-llm');
+    var chkScreen = document.getElementById('chk-screen');
+
+    try {
+        var r = await fetch('/api/setup/status');
+        var s = await r.json();
+
+        // Tesseract
+        if (s.tesseract_ok) {
+            setCheck(chkTess, 'ok', 'Tesseract OCR', 'Installed and ready');
+        } else {
+            setCheck(chkTess, 'warn', 'Tesseract OCR', 'Not found \u2014 install from github.com/UB-Mannheim/tesseract/wiki');
         }
 
-        // Chat
-        function addMsg(text, cls) {
-            const div = document.createElement('div');
-            div.className = 'msg ' + cls;
-            div.textContent = text;
-            messages.appendChild(div);
-            messages.scrollTop = messages.scrollHeight;
-            return div;
+        // Ollama
+        if (s.ollama_ok) {
+            setCheck(chkLlm, 'ok', 'LLM Backend', 'Ollama connected');
+        } else {
+            setCheck(chkLlm, 'warn', 'LLM Backend', 'Ollama not reachable \u2014 you can use OpenAI or Claude instead');
         }
+    } catch(e) {
+        setCheck(chkTess, 'err', 'Tesseract OCR', 'Unable to check');
+        setCheck(chkLlm, 'warn', 'LLM Backend', 'Unable to check');
+    }
 
-        async function sendChat() {
-            const text = input.value.trim();
-            if (!text) return;
-            input.value = '';
-            addMsg(text, 'user');
-            btn.disabled = true;
-            const loading = addMsg('Thinking...', 'bot loading');
-            try {
-                const r = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text }),
-                });
-                const d = await r.json();
-                loading.textContent = d.reply || d.error || 'No response';
-                loading.classList.remove('loading');
-            } catch {
-                loading.textContent = 'Failed to reach server.';
-                loading.classList.remove('loading');
-            }
-            btn.disabled = false;
-            input.focus();
+    // Screen capture
+    try {
+        var r2 = await fetch('/api/monitors');
+        var m = await r2.json();
+        monitorsData = m.monitors || [];
+        if (monitorsData.length > 0) {
+            setCheck(chkScreen, 'ok', 'Screen Capture', (monitorsData.length - 1) + ' monitor(s) detected');
+        } else {
+            setCheck(chkScreen, 'err', 'Screen Capture', 'No monitors detected');
         }
+    } catch(e) {
+        setCheck(chkScreen, 'err', 'Screen Capture', 'Unable to detect monitors');
+    }
 
-        btn.addEventListener('click', sendChat);
-        input.addEventListener('keydown', e => {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
-        });
+    // Enable continue
+    document.getElementById('btn-step0-next').disabled = false;
+}
 
-        // Settings
-        const providerSelect = document.getElementById('s-provider');
-        providerSelect.addEventListener('change', () => {
-            document.getElementById('ollama-opts').style.display = providerSelect.value === 'ollama' ? '' : 'none';
-            document.getElementById('openai-opts').style.display = providerSelect.value === 'openai' ? '' : 'none';
-            document.getElementById('anthropic-opts').style.display = providerSelect.value === 'anthropic' ? '' : 'none';
-        });
+function setCheck(el, status, name, detail) {
+    var icon = el.querySelector('.check-icon');
+    var nameEl = el.querySelector('.name');
+    var detailEl = el.querySelector('.detail');
+    icon.className = 'check-icon ' + status;
+    if (status === 'ok') icon.textContent = '\u2713';
+    else if (status === 'warn') icon.textContent = '\u26A0';
+    else if (status === 'err') icon.textContent = '\u2717';
+    else icon.textContent = '\u27F3';
+    nameEl.textContent = name;
+    detailEl.textContent = detail;
+}
 
-        async function openSettings() {
-            const r = await fetch('/api/settings');
-            const s = await r.json();
-            providerSelect.value = s.llm_provider;
-            providerSelect.dispatchEvent(new Event('change'));
-            document.getElementById('s-ollama-url').value = s.ollama_url;
-            document.getElementById('s-ollama-model').value = s.ollama_model;
-            document.getElementById('s-openai-model').value = s.openai_model;
-            document.getElementById('s-anthropic-model').value = s.anthropic_model;
-            document.getElementById('s-openai-hint').textContent = s.openai_key_set ? 'Key is set' : '';
-            document.getElementById('s-anthropic-hint').textContent = s.anthropic_key_set ? 'Key is set' : '';
-            document.getElementById('s-interval').value = s.capture_interval;
-            document.getElementById('s-privacy').value = (s.privacy_exclude || []).join(', ');
-            document.getElementById('settings-overlay').classList.add('show');
-        }
+function goStep(step) {
+    currentStep = step;
+    document.querySelectorAll('.step-panel').forEach(function(p){ p.classList.remove('active'); });
+    document.querySelector('.step-panel[data-step="'+step+'"]').classList.add('active');
 
-        function closeSettings() {
-            document.getElementById('settings-overlay').classList.remove('show');
-        }
+    document.querySelectorAll('.step-dot').forEach(function(d){
+        var s = parseInt(d.dataset.step);
+        d.className = 'step-dot' + (s < step ? ' done' : s === step ? ' active' : '');
+    });
 
-        async function saveSettings() {
-            const body = {
-                llm_provider: providerSelect.value,
-                ollama_url: document.getElementById('s-ollama-url').value,
-                ollama_model: document.getElementById('s-ollama-model').value,
-                openai_model: document.getElementById('s-openai-model').value,
-                anthropic_model: document.getElementById('s-anthropic-model').value,
-                capture_interval: parseInt(document.getElementById('s-interval').value) || 5,
-                privacy_exclude: document.getElementById('s-privacy').value.split(',').map(s => s.trim()).filter(Boolean),
+    // Load monitor previews when entering step 1
+    if (step === 1) loadMonitorPreviews();
+    // Show correct provider config when entering step 2
+    if (step === 2) updateProviderConfig();
+}
+
+async function loadMonitorPreviews() {
+    var grid = document.getElementById('monitor-grid');
+    grid.innerHTML = '';
+
+    for (var i = 0; i < monitorsData.length; i++) {
+        (function(m) {
+            var card = document.createElement('div');
+            card.className = 'monitor-card' + (m.index === selectedMonitor ? ' selected' : '');
+            card.onclick = function() {
+                selectedMonitor = m.index;
+                grid.querySelectorAll('.monitor-card').forEach(function(c){ c.classList.remove('selected'); });
+                card.classList.add('selected');
             };
-            const openaiKey = document.getElementById('s-openai-key').value;
-            if (openaiKey) body.openai_key = openaiKey;
-            const anthropicKey = document.getElementById('s-anthropic-key').value;
-            if (anthropicKey) body.anthropic_key = anthropicKey;
 
-            await fetch('/api/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-            });
-            closeSettings();
-            checkStatus();
-        }
+            var img = document.createElement('img');
+            img.src = '/api/monitors/preview/' + m.index + '?t=' + Date.now();
+            img.alt = m.label;
 
-        document.getElementById('settings-overlay').addEventListener('click', e => {
-            if (e.target === e.currentTarget) closeSettings();
+            var label = document.createElement('div');
+            label.className = 'mon-label';
+            label.textContent = m.label;
+
+            var size = document.createElement('div');
+            size.className = 'mon-size';
+            size.textContent = m.width + ' \u00D7 ' + m.height;
+
+            card.appendChild(img);
+            card.appendChild(label);
+            card.appendChild(size);
+            grid.appendChild(card);
+        })(monitorsData[i]);
+    }
+}
+
+function selectProvider(p) {
+    selectedProvider = p;
+    document.querySelectorAll('.provider-card').forEach(function(c){
+        c.classList.toggle('selected', c.dataset.provider === p);
+    });
+    updateProviderConfig();
+}
+
+function updateProviderConfig() {
+    ['ollama', 'openai', 'anthropic'].forEach(function(p){
+        var el = document.getElementById('cfg-' + p);
+        if (el) el.classList.toggle('show', selectedProvider === p);
+    });
+}
+
+function addPrivacyTag() {
+    var input = document.getElementById('privacy-input');
+    var val = input.value.trim().toLowerCase();
+    if (!val || privacyKeywords.indexOf(val) >= 0) { input.value = ''; return; }
+    privacyKeywords.push(val);
+    input.value = '';
+    renderPrivacyTags();
+}
+
+function removePrivacyTag(kw) {
+    privacyKeywords = privacyKeywords.filter(function(k){ return k !== kw; });
+    renderPrivacyTags();
+}
+
+function renderPrivacyTags() {
+    var cont = document.getElementById('privacy-tags');
+    cont.innerHTML = '';
+    privacyKeywords.forEach(function(kw) {
+        var tag = document.createElement('span');
+        tag.className = 'privacy-tag';
+        tag.innerHTML = '\uD83D\uDEAB ' + kw + ' <span class="remove" onclick="removePrivacyTag(\'' + kw + '\')">\u00D7</span>';
+        cont.appendChild(tag);
+    });
+}
+
+async function completeSetup() {
+    var body = {
+        monitor: selectedMonitor,
+        llm_provider: selectedProvider,
+        capture_interval: parseInt(document.getElementById('w-interval').value) || 5,
+        privacy_exclude: privacyKeywords,
+    };
+
+    if (selectedProvider === 'ollama') {
+        body.ollama_url = document.getElementById('w-ollama-url').value;
+        body.ollama_model = document.getElementById('w-ollama-model').value;
+    } else if (selectedProvider === 'openai') {
+        var okKey = document.getElementById('w-openai-key').value;
+        if (okKey) body.openai_key = okKey;
+        body.openai_model = document.getElementById('w-openai-model').value;
+    } else if (selectedProvider === 'anthropic') {
+        var akKey = document.getElementById('w-anthropic-key').value;
+        if (akKey) body.anthropic_key = akKey;
+        body.anthropic_model = document.getElementById('w-anthropic-model').value;
+    }
+
+    try {
+        await fetch('/api/setup/complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
         });
-    </script>
+    } catch (e) {
+        console.error('Setup error:', e);
+    }
+
+    var overlay = document.getElementById('setup-overlay');
+    overlay.classList.add('hidden');
+    setTimeout(function(){ overlay.remove(); }, 500);
+    startDashboard();
+}
+
+// ========== DASHBOARD ==========
+var imgEl = document.getElementById('screen-img');
+var chatInput = document.getElementById('chat-input');
+var sendBtn = document.getElementById('send-btn');
+var messagesEl = document.getElementById('messages');
+var statusEl = document.getElementById('status');
+var pauseBtn = document.getElementById('pause-btn');
+
+var screenInterval, statusInterval;
+
+function startDashboard() {
+    refreshScreen();
+    screenInterval = setInterval(refreshScreen, 3000);
+    checkStatus();
+    statusInterval = setInterval(checkStatus, 8000);
+}
+
+function refreshScreen() {
+    var n = new Image();
+    n.onload = function() { imgEl.src = n.src; };
+    n.src = '/api/screen?t=' + Date.now();
+}
+
+async function checkStatus() {
+    try {
+        var r = await fetch('/api/status');
+        var d = await r.json();
+        var prov = d.provider === 'ollama' ? d.llm : d.provider;
+        statusEl.textContent = prov + ' \u00B7 ' + d.observations + ' obs \u00B7 ' + d.model;
+        statusEl.className = d.llm === 'connected' ? 'ok' : 'err';
+        if (d.paused) {
+            pauseBtn.textContent = '\u25B6 Resume';
+            pauseBtn.classList.add('paused');
+        } else {
+            pauseBtn.textContent = '\u23F8 Pause';
+            pauseBtn.classList.remove('paused');
+        }
+    } catch(e) {
+        statusEl.textContent = 'offline';
+        statusEl.className = 'err';
+    }
+}
+
+async function togglePause() {
+    await fetch('/api/pause', { method: 'POST' });
+    checkStatus();
+}
+
+function addMsg(text, cls) {
+    var div = document.createElement('div');
+    div.className = 'msg ' + cls;
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return div;
+}
+
+async function sendChat() {
+    var text = chatInput.value.trim();
+    if (!text) return;
+    chatInput.value = '';
+    addMsg(text, 'user');
+    sendBtn.disabled = true;
+    var loading = addMsg('Thinking...', 'bot loading');
+    try {
+        var r = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text }),
+        });
+        var d = await r.json();
+        loading.textContent = d.reply || d.error || 'No response';
+        loading.classList.remove('loading');
+    } catch(e) {
+        loading.textContent = 'Failed to reach server.';
+        loading.classList.remove('loading');
+    }
+    sendBtn.disabled = false;
+    chatInput.focus();
+}
+
+sendBtn.addEventListener('click', sendChat);
+chatInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+});
+
+// ========== SETTINGS MODAL ==========
+var providerSelect = document.getElementById('s-provider');
+providerSelect.addEventListener('change', function() {
+    document.getElementById('ollama-opts').style.display = providerSelect.value === 'ollama' ? '' : 'none';
+    document.getElementById('openai-opts').style.display = providerSelect.value === 'openai' ? '' : 'none';
+    document.getElementById('anthropic-opts').style.display = providerSelect.value === 'anthropic' ? '' : 'none';
+});
+
+async function openSettings() {
+    var r = await fetch('/api/settings');
+    var s = await r.json();
+    providerSelect.value = s.llm_provider;
+    providerSelect.dispatchEvent(new Event('change'));
+    document.getElementById('s-ollama-url').value = s.ollama_url;
+    document.getElementById('s-ollama-model').value = s.ollama_model;
+    document.getElementById('s-openai-model').value = s.openai_model;
+    document.getElementById('s-anthropic-model').value = s.anthropic_model;
+    document.getElementById('s-openai-hint').textContent = s.openai_key_set ? 'Key is set' : '';
+    document.getElementById('s-anthropic-hint').textContent = s.anthropic_key_set ? 'Key is set' : '';
+    document.getElementById('s-interval').value = s.capture_interval;
+    document.getElementById('s-privacy').value = (s.privacy_exclude || []).join(', ');
+    document.getElementById('settings-overlay').classList.add('show');
+}
+
+function closeSettings() {
+    document.getElementById('settings-overlay').classList.remove('show');
+}
+
+async function saveSettings() {
+    var body = {
+        llm_provider: providerSelect.value,
+        ollama_url: document.getElementById('s-ollama-url').value,
+        ollama_model: document.getElementById('s-ollama-model').value,
+        openai_model: document.getElementById('s-openai-model').value,
+        anthropic_model: document.getElementById('s-anthropic-model').value,
+        capture_interval: parseInt(document.getElementById('s-interval').value) || 5,
+        privacy_exclude: document.getElementById('s-privacy').value.split(',').map(function(s){ return s.trim(); }).filter(Boolean),
+    };
+    var openaiKey = document.getElementById('s-openai-key').value;
+    if (openaiKey) body.openai_key = openaiKey;
+    var anthropicKey = document.getElementById('s-anthropic-key').value;
+    if (anthropicKey) body.anthropic_key = anthropicKey;
+
+    await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    closeSettings();
+    checkStatus();
+}
+
+document.getElementById('settings-overlay').addEventListener('click', function(e) {
+    if (e.target === e.currentTarget) closeSettings();
+});
+
+// ========== INIT ==========
+initSetup();
+</script>
 </body>
 </html>

@@ -1,5 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
-"""PyInstaller spec for AI Cowork."""
+"""PyInstaller spec for AI Cowork.
+
+Build with:
+    pip install pyinstaller
+    pyinstaller ai-cowork.spec
+
+Output: dist/ai-cowork/  (folder with ai-cowork.exe)
+"""
 
 import os
 import sys
@@ -15,16 +22,33 @@ a = Analysis(
         ('.env.example', '.'),
     ],
     hiddenimports=[
-        'mss', 'mss.windows',
+        # Screen capture
+        'mss', 'mss.windows', 'mss.base', 'mss.screenshot',
+        # OCR
         'pytesseract',
+        # Image processing
         'PIL', 'PIL.Image', 'PIL.ImageEnhance', 'PIL.ImageFilter', 'PIL.ImageOps',
-        'flask', 'flask_cors',
-        'dotenv',
+        # Web server
+        'flask', 'flask.json', 'flask_cors',
+        'jinja2', 'markupsafe',
+        'werkzeug', 'werkzeug.serving', 'werkzeug.debug',
+        # HTTP client
+        'requests', 'urllib3', 'certifi', 'charset_normalizer', 'idna',
+        # Config
+        'dotenv', 'python-dotenv',
+        # Windows APIs
+        'ctypes', 'ctypes.wintypes',
+        # Standard library
+        'json', 'io', 'threading', 'time', 'webbrowser', 'logging',
+        'collections', 'shutil',
     ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=[
+        'tkinter', 'unittest', 'test',
+        'numpy', 'scipy', 'pandas', 'matplotlib',
+    ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
@@ -43,6 +67,8 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
+    # console=True keeps a terminal window open to show logs
+    # Set to False for a cleaner look (no terminal)
     console=True,
     icon=None,
 )

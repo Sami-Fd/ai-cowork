@@ -14,8 +14,11 @@ if %errorlevel% neq 0 (
 )
 
 :: Check Tesseract
-if not exist "C:\Program Files\Tesseract-OCR\tesseract.exe" (
-    echo [WARN] Tesseract OCR not found at default path.
+set "TESS_FOUND=0"
+if exist "%LOCALAPPDATA%\Programs\Tesseract-OCR\tesseract.exe" set "TESS_FOUND=1"
+if exist "C:\Program Files\Tesseract-OCR\tesseract.exe" set "TESS_FOUND=1"
+if "%TESS_FOUND%"=="0" (
+    echo [WARN] Tesseract OCR not found.
     echo        Install from: https://github.com/UB-Mannheim/tesseract/wiki
     echo        Or set TESSERACT_PATH in .env
     echo.
