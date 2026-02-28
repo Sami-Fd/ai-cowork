@@ -1,0 +1,7 @@
+flask
+flask-cors
+mss
+Pillow
+pytesseract
+requests
+python-dotenv

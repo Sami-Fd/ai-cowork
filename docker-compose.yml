@@ -1,0 +1,43 @@
+services:
+  # Ollama — GPU-Accelerated LLM server
+  ollama:
+    image: ollama/ollama:latest
+    container_name: cowork-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+  # Pull the reasoning model on first run
+  model-loader:
+    image: ollama/ollama:latest
+    container_name: cowork-model-loader
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        echo "Pulling reasoning model (qwen2.5:7b)..."
+        ollama pull qwen2.5:7b
+        echo "Model ready!"
+    restart: "no"
+
+volumes:
+  ollama-data:
